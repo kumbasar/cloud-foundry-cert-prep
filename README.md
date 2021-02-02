@@ -199,6 +199,15 @@ cf config --trace false
 
 ### Deploying Apps aka cf push
 
+CLI - `cf push` -> cloud controller -- cc Db
+
+Steps:
+1. App metadata (space, number of instances)
+2. Route reservation if requested. Assocaited with app
+3. Upload app binary
+4. Stating - Preparing buildpack to run the app in a binary package (droplet). Droplet is stored in blobstore
+5. Run the app package (droplet) inside a container on a cell inside diego
+6. Available. Router routes app traffic to running instance(s)
 
 Example:
 
