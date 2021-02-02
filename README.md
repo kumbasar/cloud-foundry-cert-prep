@@ -2,7 +2,7 @@
 
 [Suse Cloud Application Platform Developer Sandbox](https://developer.suse.com/capsandbox/) 
 
-- Cloud Foundry is a Platform ad a Service (PaaS)
+- Cloud Foundry is a Platform as a Service (PaaS)
 - Applications run on cells => containers
 - Buildpack => deployment of applications. Supports a variety of languages
 ## CF Login
@@ -81,28 +81,29 @@ space:          dev
 ## CF cURL - API version
 
 ```bash
-cf curl /v2 info
+cf curl /v2/info
 ```
 
 Example output
 ```bash
 {
-   "name": "IBM Cloud",
-   "build": "v15.5.0",
-   "support": "http://ibm.biz/bluemix-supportinfo",
-   "version": 0,
-   "description": "IBM Bluemix",
-   "authorization_endpoint": "https://iam.cloud.ibm.com/cloudfoundry/login/uk-south",
-   "token_endpoint": "https://uaa.eu-gb.cf.cloud.ibm.com",
+   "name": "KubeCF",
+   "build": "2.1.0",
+   "support": "https://www.suse.com/support/",
+   "version": 2,
+   "description": "SUSE version of CloudFoundry KubeCF",
+   "authorization_endpoint": "https://login.cap.explore.suse.dev",
+   "token_endpoint": "https://uaa.cap.explore.suse.dev",
    "min_cli_version": null,
    "min_recommended_cli_version": null,
-   "app_ssh_endpoint": "ssh.eu-gb.cf.cloud.ibm.com:2222",
-   "app_ssh_host_key_fingerprint": "c7:1f:89:2a:62:3b:78:a9:08:c9:33:81:fb:39:26:da",
+   "app_ssh_endpoint": "ssh.cap.explore.suse.dev:2222",
+   "app_ssh_host_key_fingerprint": "8d:4f:be:68:3e:94:9a:3e:92:b8:4d:ab:06:dd:db:c7",
    "app_ssh_oauth_client": "ssh-proxy",
-   "doppler_logging_endpoint": "wss://doppler.eu-gb.cf.cloud.ibm.com:443",
-   "api_version": "2.158.0",
+   "doppler_logging_endpoint": "wss://doppler.cap.explore.suse.dev:443",
+   "api_version": "2.153.0",
    "osbapi_version": "2.15",
-   "user": "ba6f3c88-3ab3-4e21-a4b3-a52b5210ce10"
+   "routing_endpoint": "https://api.cap.explore.suse.dev/routing",
+   "user": "ac7b46ca-075a-4181-94c3-2f548cbcfb7d"
 }
 ```
 
@@ -233,3 +234,5 @@ start command:   JAVA_OPTS="-agentpath:$PWD/.java-buildpack/open_jdk_jre/bin/jvm
      state     since                  cpu    memory           disk           details
 #0   running   2021-02-02T20:13:24Z   0.0%   116.2M of 750M   140.2M of 1G
 ```
+
+Check out [roster](https://roster-bright-tasmaniandevil-ys.cap.explore.suse.dev)
