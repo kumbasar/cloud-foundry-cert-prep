@@ -1,0 +1,15 @@
+version: 1
+applications:
+- name: roster
+  memory: 750M
+  instances: 1
+  random-route: true
+  buildpacks:
+  - java_buildpack
+  path: ./rest-data-service.jar
+  env:
+    ROSTER_A: ROSTER_A_VAR
+    ROSTER_B: ROSTER_B_VAR
+    ROSTER_C: ROSTER_C_VAR
+  services:
+  - dbroster 
