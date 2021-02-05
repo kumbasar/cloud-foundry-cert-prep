@@ -272,6 +272,7 @@ cf app <APP_NAME>
 
 - Metron agents collects the app logs on the cells in Diego
 - Metron agents fwd the logs yo the Doppler servers (loggregator)
+- Diego/Cells/Metron - logs, events, metrics -> Doppler/Loggregator
 - Logs: Standart out and error outputs
 - Lables:
     - **STG**: staging logs
@@ -526,4 +527,59 @@ applications:
 Push:
 ```bash
 cf push
+```
+
+### CUPS - User-Provided Service Instance
+
+Usage:
+```bash
+cf create-user-provided-service SERVICE_INSTANCE [-p CREDENTIALS] [-l SYSLOG_DRAIN_URL] [-r ROUTE_SERVICE_URL] [-t TAGS]
+```
+
+Log Drain example:
+
+Free service: [Papertrail](https://papertrailapp.com/)
+
+```bash
+URL="syslog-tls://logs2.papertrailapp.com:XXXXX"
+cf cups papertrail -l $URL
+cf bs roster papertrail
+cf restage roster
+```
+
+Checkout [Dashboard](https://papertrailapp.com/dashboard)
+
+### Routes
+- By default HTTP 80 and 443 is supported
+- TCP is also supported (IoT solutions)
+- GoRouter routes incomming traffice to Cloud Controller or to App (Diego Cell)
+- GoRouter provides:
+    - Round-robin load-balancing
+    - HTTPS traffic. `X-Forwarded-Proto` header.
+    - Ticky sessions when the `JSESSIONID` cookie appears.
+- HTTP route format: <hostname>.<appdomain>/<contextpath>
+- Random routes should not be used for production applications.
+- API URL: api.<systemdomain>
+- DNS CNAME record
+- System domain => Used by CF compenents like cloud controllers
+- Shared apps domain: shared across CF instance
+- Private apps domain: scopred to one or more Orgs
+- Separating Applications and Routes
+    - Zero Downtime updates
+    - Many routes/urls for the same app (A/B testing, branding)
+    - Testing and debugging
+- Blue-Green Deployments:
+
+Example:
+```bash
+cf se roster APP_VERSION blue
+cf restage roster
+cf push roster-green
+cf a
+cf map-route roster-green cap.explore.suse.dev --hostname roster-fantastic-oribi-nm
+cf unmap-route roster roster-fantastic-oribi-nm.cap.explore.suse.dev
+cf delete roster
+cf rename roster-green roster
+cf se roster APP_VERSION blue
+cf restage roster
 ```

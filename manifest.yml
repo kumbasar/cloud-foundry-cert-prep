@@ -11,5 +11,7 @@ applications:
     ROSTER_A: ROSTER_A_VAR
     ROSTER_B: ROSTER_B_VAR
     ROSTER_C: ROSTER_C_VAR
+    APP_VERSION: green
   services:
-  - dbroster 
+    - my-drain-service
+    - dbroster
