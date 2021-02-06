@@ -15,3 +15,4 @@ applications:
   services:
     - my-drain-service
     - dbroster
+    - roster_newrelic

@@ -6,6 +6,8 @@
 - Applications run on cells => containers
 - Buildpack => deployment of applications. Supports a variety of languages
 - Runs on the top an IaaS (AWS, GCP or OpenStack)
+- Cloud Foundry supports OCI-compliant (Docker) container images.
+- Spaces can be used to separate env (development, staging, production).
 ## CF Login
 
 **Target**: Cloud Foundry instance
@@ -176,7 +178,33 @@ cf config --trace false
 - Responsible for the lifecycle of applications/tasks
 - Contains one or more compute nodes (== VM) called Cells. Cells run containers, which execute our applications and tasks.
 - cells < Diego
+- Responsible for starting applications and tasks
+- Making sure applications stay running
+- Placing applications across many VMs for resilience
+- Orchestrations
+- **Garden**: A platform-agnostic API. Pluggable backends for the Open Container Initiative (OCI) specifications. Also supports Docke images. Two backends:
+    1. Guardian: Linux runc
+    2. Greenhouse: Windows backend
 
+### App Instance
+- An App Instance contains: RootFS, Droplet files and Json Environment objects (`VCAP_APPLICATION` abn `VCAP_SERVICES`)
+- Runs inside a Diego cell
+- `$PORT` used for network traffic
+
+
+### Application Execution and Security Groups (ASGs)
+
+- Allows to define various egress network access rules for containers
+- Two pre-configured defaults:
+1. **public_networks**: 
+    - Allow public network access. 
+    - Blocks access to private networks
+    - Block access to link=local access
+2. **dns**: Allow access to DNS (port #53)
+- Runtime ASGs: Allow access application instances over the network to any resources they require. White-listed via CF-CLI
+- Uses iptables?
+- Staging-Time ASGs: To pull resources from the network when an application is being transformed into a droplet via Could Controller API, not CF CLI.
+- Both ASG: Org-/Space-scoped extensions of white-listed access
 ### Router
 - For routing traffic into applications (==Diego) and to the cloud controllers
 
@@ -583,3 +611,181 @@ cf rename roster-green roster
 cf se roster APP_VERSION blue
 cf restage roster
 ```
+
+### Staging and Running
+
+**Staging**: the buildpack combines the application code with any framework and/or runtime dependencies to produce a droplet. It reproduce a droplet.
+
+
+### Pushing an Application
+
+- User executes: `cf push` via CF CLI
+- CF CLI -> Cloud Controller (CCNG)
+- App metadata (space, app name' instance size, allocated resoures) stored in CCDB
+- App files stored in CCNG blobstore
+- Stage app -> Diego Cell (Staging)
+- Store app droplet in CCNG blobstore
+- Start Staged app inside Diego Cell (Running)
+
+
+### Buildpacks
+
+List buildpacks:
+```bash
+cf buildpacks
+```
+
+Example output:
+
+```bash
+buildpack               position   enabled   locked   filename                                       stack
+hugo_buildpack          1          true      false    hugo-buildpack.zip                             sle15
+staticfile_buildpack    2          true      false    staticfile-buildpack-sle15-v1.5.12.1.zip       sle15
+staticfile_buildpack    3          true      false    staticfile-buildpack-cflinuxfs3-v1.5.9.zip     cflinuxfs3
+nginx_buildpack         4          true      false    nginx-buildpack-sle15-v1.1.15.1.zip            sle15
+nginx_buildpack         5          true      false    nginx-buildpack-cflinuxfs3-v1.1.12.zip         cflinuxfs3
+java_buildpack          6          true      false    java-buildpack-sle15-v4.32.1.1.zip             sle15
+java_buildpack          7          true      false    java-buildpack-cflinuxfs3-v4.32.1.zip          cflinuxfs3
+ruby_buildpack          8          true      false    ruby-buildpack-sle15-v1.8.25.1.zip             sle15
+ruby_buildpack          9          true      false    ruby-buildpack-cflinuxfs3-v1.8.23.zip          cflinuxfs3
+nodejs_buildpack        10         true      false    nodejs-buildpack-sle15-v1.7.30.1.zip           sle15
+nodejs_buildpack        11         true      false    nodejs-buildpack-cflinuxfs3-v1.7.25.zip        cflinuxfs3
+go_buildpack            12         true      false    go-buildpack-sle15-v1.9.19.1.zip               sle15
+go_buildpack            13         true      false    go-buildpack-cflinuxfs3-v1.9.16.zip            cflinuxfs3
+python_buildpack        14         true      false    python-buildpack-sle15-v1.7.23.1.zip           sle15
+python_buildpack        15         true      false    python-buildpack-cflinuxfs3-v1.7.18.zip        cflinuxfs3
+php_buildpack           16         true      false    php-buildpack-sle15-v4.4.22.1.zip              sle15
+php_buildpack           17         true      false    php-buildpack-cflinuxfs3-v4.4.19.zip           cflinuxfs3
+binary_buildpack        18         true      false    binary-buildpack-sle15-v1.0.36.1.zip           sle15
+binary_buildpack        19         true      false    binary-buildpack-cflinuxfs3-v1.0.36.zip        cflinuxfs3
+dotnet-core_buildpack   20         true      false    dotnet-core-buildpack-sle15-v2.3.16.1.zip      sle15
+dotnet-core_buildpack   21         true      false    dotnet-core-buildpack-cflinuxfs3-v2.3.13.zip   cflinuxfs3
+r_buildpack             22         true      false    r-buildpack-cflinuxfs3-v1.1.7.zip              cflinuxfs3
+```
+
+Multiple buildbacks:
+
+```bash
+cf push -b buildpack1 -b buildpack2 -b buildpack3
+```
+
+Here `buildpack1` and `buildpack2` are non-final and `buildpack3` is the final buildpack. Non-finals are only supply dependencies.
+
+Buildpack API:
+- detect: determines the rigth buildpack
+- supply: adds dependency to the droplet. Executes for every buildpack.
+- finalize: prepares the app or launch
+- release: provides metadata. Start command
+
+Buildpack can be:
+1. Offline: Fully contained, no download
+2. Online: Dependencies are downloaded either remotely or from a local source
+
+**Stacks**: Provide the root filesystem (rootFS)
+
+**Launcher**: `Droplet` + `stack` > `Garden container`
+
+### SSH
+
+```bash
+cf enable-ssh <APP_NAME>
+cf ssh <APP_NAME>
+```
+
+Start command: `/var/vcap/staging_info.yml`
+
+### Route Services 
+
+Route services are bount to a route, not an appplication
+
+Provides:
+- Authentication/Authorization
+- Rate limiting
+- Caching services
+
+**Fully-Brokered Service: CF Router-first**
+User -> Router -> Route Service Instance -> Router -> Diego/Cell/Container
+
+**Static, Brokered Service: Service Intansce first**
+- route service is out side CF
+- User -> Route Service Instance -> Router -> Diego/Cell/Container
+
+**Rate limit service** example
+
+```bash
+cf push rate-limit -f manifest-limit.yml
+cf cups limit-service -r https://roster-service-limit.cap.explore.suse.dev
+cf bind-route-service cap.explore.suse.dev --hostname web-ui-delightful-bear-pa limit-service
+```
+
+Test page: [Web UI](https://web-ui-delightful-bear-pa.cap.explore.suse.dev/people?)
+
+### Docker
+
+Push a image
+
+```bash
+cf push <APP_NAME> -o <DOCKER_IMAGE>
+```
+
+Example: push docker image and disable health check
+```bash
+cf push worker -o engineerbetter/worker-image --health-check-type none
+```
+
+
+### Service-key
+
+```bash
+cf create-service-key --help
+```
+
+Example: Create a service key and get cred info:
+```bash
+cf create-service-key dbroster dbrosterkey
+cf service-key dbroster dbrosterkey
+```
+
+
+### User Account and Authentication (UAA)
+
+- OAuth2 provider:
+    - Issuing client tokens
+    - authenticate users with their CF credentials
+- OAuth2 hase 4 modes (grant types):
+    1. authorization code
+    2. password
+    3. client credentials
+    4. implicit
+- Tokens:
+    1. Access Tokens
+    2.  Refesh tokens
+
+### Create Route
+
+```bash
+cf create-route SPACE DOMAIN [--hostname HOSTNAME] [--path PATH]
+```
+
+Sample:
+
+```bash
+cf create-route dev cap.explore.suse.dev --hostname kumbasar-uaa
+```
+
+Check:
+```bash
+cf routes
+```
+
+### Logging
+
+**span**: A basic unit of work. Contains unique IDs, timing information, and other meta information. `X-B3-SpanId`. Parant span: `X-B3-ParentSpan`
+**trace**:A set of spans. Represenet a logical request. `X-B3-TraceId`
+
+### Coping Strategies
+1. Additive Changes: Adding new features instead of changing existing. Doesn't allow feature remove.
+2. Version Mediation: Versioning scheme
+    - One Application Supporting Many Contracts
+    - Client-Aware Routing
+    - Opaque Routing
