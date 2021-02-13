@@ -7,6 +7,7 @@ applications:
   buildpacks:
   - java_buildpack
   path: ./rest-data-service.jar
+  stack: cflinuxfs3
   env:
     ROSTER_A: ROSTER_A_VAR
     ROSTER_B: ROSTER_B_VAR
