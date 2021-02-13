@@ -8,7 +8,7 @@
 - Runs on the top an IaaS (AWS, GCP or OpenStack)
 - Cloud Foundry supports OCI-compliant (Docker) container images.
 - Spaces can be used to separate env (development, staging, production).
-## CF Login
+## CF Login and Auth
 
 **Target**: Cloud Foundry instance
 
@@ -23,6 +23,25 @@ Or login oneshot:
 
 ```bash
 cf login -a https://api.cap.explore.suse.dev -u welcome -p <PASSWORD>
+```
+
+**Non-Interactive Authentication**
+
+Environment variables: `CF_USERNAME` and `CF_PASSWORD`
+
+```bash
+cf auth --help
+```
+
+**One-time passcode**
+
+```bash
+cf login --sso
+```
+
+**Logout**
+```bash
+cf logout
 ```
 
 ## CF Help
@@ -81,13 +100,43 @@ org:            welcome
 space:          dev
 ```
 
+**Scope**
+
+```bash
+cf share-service SERVICE_INSTANCE -s OTHER_SPACE
+```
+
+## Global Roles
+
+### Org Roles
+- OrgManager: Administer the org
+- OrgAuditor: Read-only access to the org
+- BillingManager
+
+### Space Roels:
+- SpaceManager: Administer role
+- SpaceDeveloper: Manage apps, services and routes
+- SpaceAuditor: Read-only access to the space
+
 ## CF cURL - API version
+
+```bash
+cf api --version
+```
+
+Output:
+```bash
+api endpoint:   https://api.cap.explore.suse.dev
+api version:    2.153.0
+```
+
+or
 
 ```bash
 cf curl /v2/info
 ```
 
-Example output
+Example output:
 ```bash
 {
    "name": "KubeCF",
@@ -302,7 +351,7 @@ cf app <APP_NAME>
 - Metron agents fwd the logs yo the Doppler servers (loggregator)
 - Diego/Cells/Metron - logs, events, metrics -> Doppler/Loggregator
 - Logs: Standart out and error outputs
-- Lables:
+- Labels:
     - **STG**: staging logs
     - **APP/PROC/<name>/<index>**: App instance runtime logs
     - **CELL/<index>**: Diego cell logs
@@ -469,7 +518,7 @@ Recommendations, not requirements
 - Declares all dependencies via manifest
 
 3. Configuration
-- Example: `VCAP+SERVICES`
+- Example: `VCAP_SERVICES`
 
 4. Backing Services
 - Any service over the network
@@ -693,6 +742,19 @@ cf ssh <APP_NAME>
 ```
 
 Start command: `/var/vcap/staging_info.yml`
+
+### Task
+
+Running a task example:
+
+```bash
+cf run-task training-app -m 8M -k 64M --name printenv "tasks/printenv.sh"
+```
+
+Status:
+```bash
+cf tasks training-app
+```
 
 ### Route Services 
 
