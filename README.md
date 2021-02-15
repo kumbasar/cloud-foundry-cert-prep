@@ -1,4 +1,4 @@
-# Cloud Foundry Workspace
+# Cloud Foundry Certified Developer (CFCD) Exam Preparations
 
 [Suse Cloud Application Platform Developer Sandbox](https://developer.suse.com/capsandbox/) 
 
@@ -8,6 +8,7 @@
 - Runs on the top an IaaS (AWS, GCP or OpenStack)
 - Cloud Foundry supports OCI-compliant (Docker) container images.
 - Spaces can be used to separate env (development, staging, production).
+
 ## CF Login and Auth
 
 **Target**: Cloud Foundry instance
@@ -241,7 +242,7 @@ cf config --trace false
 - `$PORT` used for network traffic
 
 
-### Application Execution and Security Groups (ASGs)
+## Application Execution and Security Groups (ASGs)
 
 - Allows to define various egress network access rules for containers
 - Two pre-configured defaults:
@@ -254,25 +255,24 @@ cf config --trace false
 - Uses iptables?
 - Staging-Time ASGs: To pull resources from the network when an application is being transformed into a droplet via Could Controller API, not CF CLI.
 - Both ASG: Org-/Space-scoped extensions of white-listed access
-### Router
+## Router
 - For routing traffic into applications (==Diego) and to the cloud controllers
 
-### Buildpacks
+## Buildpacks
 - Providing required runtime dependencies (JRE, npm) for the applications
 - Responsible for preparing applications for execution inside containers in Diego.
 - Droplet: Application + runtime dependencies => Executed inside a container
 - Runtime Standardization
  
-### User Account and Authentication (UAA)
+## User Account and Authentication (UAA)
 - OAuth2 provider
 - issue tokens for client apps
 
-
-### Loggregator
+## Loggregator
 - Aggregate logs (apps), events and metrics from the cells.
 - Cells (Diego) - logs/evets/metrics -> loggreator - logs/evets/metrics -> users
 
-### Service Broker
+## Service Broker
 -  Allows back'ng services to be provisioned and consumed using the CF APIs, without knowledge of the underlying service
 - Cloud Controller <-> Service Brocker API/Service Broker <-> external services (Postgresql, MySQL)
 - Extends platform
@@ -327,7 +327,7 @@ start command:   JAVA_OPTS="-agentpath:$PWD/.java-buildpack/open_jdk_jre/bin/jvm
 
 Check out [roster](https://roster-bright-tasmaniandevil-ys.cap.explore.suse.dev)
 
-### Scale
+## Scale
 
 ```bash
 cf scale --help
@@ -339,13 +339,13 @@ cf scale APP_NAME [-i INSTANCES] [-k DISK] [-m MEMORY] [-f]
 - Vertical scaling (memory/disk): Downtime and slow => New container with the new resources (restart required)
 - Horizintal scaling (instance size): No downtime and fast => New container with already cached droplet.
 
-### App Status
+## App Status
 
 ```bash
 cf app <APP_NAME>
 ```
 
-### Logging&Metrics
+## Logging&Metrics
 
 - Metron agents collects the app logs on the cells in Diego
 - Metron agents fwd the logs yo the Doppler servers (loggregator)
@@ -392,13 +392,13 @@ time                          event                      actor                  
 2021-02-02T23:12:18.00+0300   audit.app.create           vkumbasar@icloud.com   instances: 1, memory: 750, state: STOPPED, environment_json: [PRIVATE DATA HIDDEN]
 ```
 
-### Resiliency
+## Resiliency
 - BOSH: creating and managing Cloud Foundry on top of different cloud providers.
 - Deploy app in different AZ
 - Failed app instances are automatically recreated
 - Diego deploys instances of the same app across different cells and AZs
 
-### Application Lifecycle
+## Application Lifecycle
 
 **The Concerns:**
 - Application Code (Continous Delivery)
@@ -406,7 +406,7 @@ time                          event                      actor                  
 - Root Filesystem
 - Cell Operation System (Stemcells)
 
-### Services
+## Services
 
 **Service**: External element that the app can interact. In CF service means the offer type. Whereas, service instance means the instance of the service which the apps interacts.
 
@@ -492,7 +492,7 @@ Space developers might register a broker with the cloud controller
 cf create-service-broker --space-scoped
 ```
 
-### Restage vs Restart
+## Restage vs Restart
 
 ```bash
 cf restage <APP_NAME>
@@ -562,7 +562,7 @@ Recommendations, not requirements
 12. Administrative Processses
 
 
-### Application Environment Variables
+## Application Environment Variables
 
 ```bash
 cf env <APP_NAME>
@@ -606,7 +606,7 @@ Push:
 cf push
 ```
 
-### CUPS - User-Provided Service Instance
+## CUPS - User-Provided Service Instance
 
 Usage:
 ```bash
@@ -626,7 +626,7 @@ cf restage roster
 
 Checkout [Dashboard](https://papertrailapp.com/dashboard)
 
-### Routes
+## Routes
 - By default HTTP 80 and 443 is supported
 - TCP is also supported (IoT solutions)
 - GoRouter routes incomming traffice to Cloud Controller or to App (Diego Cell)
@@ -661,12 +661,12 @@ cf se roster APP_VERSION blue
 cf restage roster
 ```
 
-### Staging and Running
+## Staging and Running
 
 **Staging**: the buildpack combines the application code with any framework and/or runtime dependencies to produce a droplet. It reproduce a droplet.
 
 
-### Pushing an Application
+## Pushing an Application
 
 - User executes: `cf push` via CF CLI
 - CF CLI -> Cloud Controller (CCNG)
@@ -677,7 +677,7 @@ cf restage roster
 - Start Staged app inside Diego Cell (Running)
 
 
-### Buildpacks
+## Buildpacks
 
 List buildpacks:
 ```bash
@@ -734,11 +734,31 @@ Buildpack can be:
 
 **Launcher**: `Droplet` + `stack` > `Garden container`
 
-### SSH
+## SSH
 
 ```bash
 cf enable-ssh <APP_NAME>
 cf ssh <APP_NAME>
+```
+
+Example:
+```bash
+cf enable-ssh roster
+Enabling ssh support for 'roster'...
+
+OK
+```
+
+To check:
+```bash
+cf ssh-enabled roster      
+ssh support is enabled for 'roster'
+```
+
+SSH to instance:
+
+```bash
+cf ssh <APP_NAME> --app-instance-index <INSTANCE_INDEX> 
 ```
 
 Start command: `/var/vcap/staging_info.yml`
@@ -795,8 +815,7 @@ Example: push docker image and disable health check
 cf push worker -o engineerbetter/worker-image --health-check-type none
 ```
 
-
-### Service-key
+## Service-key
 
 ```bash
 cf create-service-key --help
@@ -809,7 +828,7 @@ cf service-key dbroster dbrosterkey
 ```
 
 
-### User Account and Authentication (UAA)
+## User Account and Authentication (UAA)
 
 - OAuth2 provider:
     - Issuing client tokens
@@ -823,7 +842,7 @@ cf service-key dbroster dbrosterkey
     1. Access Tokens
     2.  Refesh tokens
 
-### Create Route
+## Create Route
 
 ```bash
 cf create-route SPACE DOMAIN [--hostname HOSTNAME] [--path PATH]
@@ -840,14 +859,69 @@ Check:
 cf routes
 ```
 
-### Logging
+## Internal domain
+
+```bash
+cf domains
+```
+
+Example output
+
+```bash
+Getting domains in org welcome as welcome...
+name                          status   type   details
+cap.explore.suse.dev          shared
+tcp.cap.explore.suse.dev      shared   tcp
+apps.internal                 shared          internal
+volkan.cap.explore.suse.dev   owned
+```
+
+**internal** domain: `apps.internal `
+
+### Container to container network
+
+For networking, it's require to add a network policy:
+
+```bash
+cf add-network-policy --help
+```
+
+```bash
+cf add-network-policy SOURCE_APP --destination-app DESTINATION_APP
+```
+
+The default port is: `8080`
+
+Example:
+```bash
+cf add-network-policy web-ui --destination-app roster
+```
+
+Check:
+```bash
+cf network-policies
+Listing network policies in org welcome / space dev as welcome...
+
+source   destination   protocol   ports    destination space   destination org
+web-ui   roster        tcp        8080     dev                 welcome
+```
+
+
+## Logging
 
 **span**: A basic unit of work. Contains unique IDs, timing information, and other meta information. `X-B3-SpanId`. Parant span: `X-B3-ParentSpan`
 **trace**:A set of spans. Represenet a logical request. `X-B3-TraceId`
 
-### Coping Strategies
+## Coping Strategies
 1. Additive Changes: Adding new features instead of changing existing. Doesn't allow feature remove.
 2. Version Mediation: Versioning scheme
     - One Application Supporting Many Contracts
     - Client-Aware Routing
     - Opaque Routing
+
+
+## References
+- [EXAM PREPARATION CLOUD FOUNDRY CERTIFIED DEVELOPER](https://cfcd-prep.cloudfoundry.org)
+- [Get Started with Cloud Foundry](https://www.cloudfoundry.org/get-started/)
+- [Cloud Foundry Certified Developer](https://acloudguru.com/course/cloud-foundry-certified-developer)
+- [Aiming for the Cloud Foundry Certified Developer (CFCD) certification? Here are some tips.](https://medium.com/@dchucks/aiming-for-the-cloud-foundry-certified-developer-cfcd-certification-here-are-some-tips-5c37732b4f34)

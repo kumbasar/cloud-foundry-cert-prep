@@ -1,19 +1,20 @@
+---
 version: 1
 applications:
 - name: roster
-  memory: 750M
+  path: rest-data-service.jar
+  memory: 750m
   instances: 1
   random-route: true
   buildpacks:
   - java_buildpack
-  path: ./rest-data-service.jar
-  stack: cflinuxfs3
   env:
-    ROSTER_A: ROSTER_A_VAR
-    ROSTER_B: ROSTER_B_VAR
-    ROSTER_C: ROSTER_C_VAR
-    APP_VERSION: green
+   ROSTER_A: ROSTER_A_VAR
+   ROSTER_B: ROSTER_B_VAR
+   ROSTER_C: ROSTER_C_VAR
+   APP_VERSION: green
+  timeout: 90
   services:
-    - my-drain-service
-    - dbroster
-    - roster_newrelic
+   - rosterdb
+   - my-drain-service
+
